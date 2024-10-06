@@ -17,7 +17,7 @@ def create_bmp(info):
     
     # Set font for text
     try:
-        large_font = ImageFont.truetype("times.ttf", 48)  # Further increased font size for name
+        large_font = ImageFont.truetype("arial.ttf", 48)  # Further increased font size for name
         font = ImageFont.truetype("arial.ttf", 16)
     except IOError:
         large_font = ImageFont.load_default()
@@ -57,4 +57,4 @@ def create_bmp(info):
     draw.text((change_x, change_y), change_text, fill="black", font=font)
     
     # Save the image as BMP
-    img.save("output.bmp")
+    return img

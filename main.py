@@ -2,7 +2,7 @@ import os
 import requests
 import csv
 import time
-
+import eink
 import makeBMP
 
 # Get the API key from environment variable
@@ -17,7 +17,7 @@ def fetch_price(item_id):
         if data.get('data') and item_id in data['data']:
             return data['data'][item_id]  # Return the specific item data
     else:
-        print(f"Failed to fetch data for {item_id}. Status code: {response.status_code}")
+        eink(f"Failed to fetch data for {item_id}. Status code: {response.status_code}")
     return None
 
 def fetch_price_24h(token_name):
@@ -35,7 +35,7 @@ def fetch_price_24h(token_name):
             price_change_usd = (current_price * price_change_percentage) / 100  # Calculate the USD amount change
             return current_price, price_change_percentage, price_change_usd
     else:
-        print(f"Failed to fetch data for {token_name}. Status code: {response.status_code}")
+        eink(f"Failed to fetch data for {token_name}. Status code: {response.status_code}")
     return None, None, None
 
 def load_csv(filename):
@@ -79,8 +79,8 @@ def main():
         token_name, item_id = tokens[index]
         result = process_token(token_name, item_id)
         # print(result)
-        makeBMP.create_bmp(result)
         index = (index + 1) % total_tokens  # Reset to 0 when the end is reached
+        eink.show_on_display(makeBMP.create_bmp(result))
         time.sleep(delay)  # Wait for specified delay before fetching the next price
 
 if __name__ == "__main__":
