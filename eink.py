@@ -28,9 +28,8 @@ def show_on_display(image):
         epd.init()
         
         logging.info("1.read output file")
-        Himage = Image.open(os.path.join(picdir, image))
 
-        epd.display(epd.getbuffer(Himage))
+        epd.display(epd.getbuffer(image))
         
         epd.sleep()
        
