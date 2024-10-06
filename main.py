@@ -3,6 +3,8 @@ import requests
 import csv
 import time
 
+import makeBMP
+
 # Get the API key from environment variable
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
 
@@ -19,7 +21,7 @@ def fetch_price(item_id):
     return None
 
 def fetch_price_24h(token_name):
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={token_name}&vs_currencies=usd&include_24hr_change=true"
+    url = f"https://api.coingecko.com/api/v3/simple/price?ids={token_name.lower()}&vs_currencies=usd&include_24hr_change=true"
     headers = {
         'Authorization': f'Bearer {COINGECKO_API_KEY}'
     }
@@ -62,23 +64,24 @@ def process_token(token_name, item_id):
             else:
                 price_change_str = f"+{price_change_percentage:.2f}%"  # Positive percentage gets a '+' sign
 
-            print(f"{token_name}: ${current_price} {price_change_str}, ${price_change_usd:.4f}")
+            return f"{token_name}, ${current_price:.6f}, {price_change_str}, ${price_change_usd:.4f}"
         else:
-            print(f"Could not fetch price change for {token_name} from CoinGecko.")
-
-def run_price_updates(tokens, delay=3):
-    index = 0
-    total_tokens = len(tokens)
-    
-    while True:
-        token_name, item_id = tokens[index]
-        process_token(token_name, item_id)
-        index = (index + 1) % total_tokens  # Reset to 0 when the end is reached
-        time.sleep(delay)  # Wait for specified delay before fetching the next price
+            return f"Could not fetch price change for {token_name} from CoinGecko."
+    return f"Failed to fetch price for {token_name} from Jupiter API."
 
 def main():
     tokens = load_csv('data.csv')  # Replace with your CSV file name
-    run_price_updates(tokens)
+    index = 0
+    total_tokens = len(tokens)
+    delay = 3
+    
+    while True:
+        token_name, item_id = tokens[index]
+        result = process_token(token_name, item_id)
+        # print(result)
+        makeBMP.create_bmp(result)
+        index = (index + 1) % total_tokens  # Reset to 0 when the end is reached
+        time.sleep(delay)  # Wait for specified delay before fetching the next price
 
 if __name__ == "__main__":
     main()

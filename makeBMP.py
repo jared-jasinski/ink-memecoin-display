@@ -58,8 +58,3 @@ def create_bmp(info):
     
     # Save the image as BMP
     img.save("output.bmp")
-
-# Example usage
-info = "RetardedAPR, $0.220684, +8.98%, $0.0198"
-create_bmp(info)
-print("BMP image created as 'output.bmp'")
