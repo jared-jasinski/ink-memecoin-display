@@ -46,35 +46,39 @@ def load_csv(filename):
             tokens.append((token_name, token_id))  # Store as (token_name, token_id)
     return tokens
 
-def main():
-    tokens = load_csv('data.csv')  # Replace with your CSV file name
+def process_token(token_name, item_id):
+    # Fetch price from Jupiter API
+    jup_data = fetch_price(item_id)
+    if jup_data:
+        jup_price = jup_data['price']  # Get the price from the returned data
+
+        # Fetch 24-hour price change from CoinGecko API
+        current_price, price_change_percentage, price_change_usd = fetch_price_24h(token_name.lower())
+        if current_price is not None:
+            # Format the price change with proper signs
+            price_change_str = f"{price_change_percentage:.2f}%"
+            if price_change_percentage < 0:
+                price_change_str = f"{price_change_percentage:.2f}%"  # Negative percentage will show '-' by default
+            else:
+                price_change_str = f"+{price_change_percentage:.2f}%"  # Positive percentage gets a '+' sign
+
+            print(f"{token_name}: ${current_price} {price_change_str}, ${price_change_usd:.4f}")
+        else:
+            print(f"Could not fetch price change for {token_name} from CoinGecko.")
+
+def run_price_updates(tokens, delay=3):
     index = 0
     total_tokens = len(tokens)
     
     while True:
         token_name, item_id = tokens[index]
-        
-        # Fetch price from Jupiter API
-        jup_data = fetch_price(item_id)
-        if jup_data:
-            jup_price = jup_data['price']  # Get the price from the returned data
-
-            # Fetch 24-hour price change from CoinGecko API
-            current_price, price_change_percentage, price_change_usd = fetch_price_24h(token_name.lower())
-            if current_price is not None:
-                # Format the price change with proper signs
-                price_change_str = f"{price_change_percentage:.2f}%"
-                if price_change_percentage < 0:
-                    price_change_str = f"{price_change_percentage:.2f}%"  # Negative percentage will show '-' by default
-                else:
-                    price_change_str = f"+{price_change_percentage:.2f}%"  # Positive percentage gets a '+' sign
-
-                print(f"{token_name}: ${current_price} {price_change_str}, ${price_change_usd:.4f}")
-            else:
-                print(f"Could not fetch price change for {token_name} from CoinGecko.")
-
+        process_token(token_name, item_id)
         index = (index + 1) % total_tokens  # Reset to 0 when the end is reached
-        time.sleep(3)  # Wait for 3 seconds before fetching the next price
+        time.sleep(delay)  # Wait for specified delay before fetching the next price
+
+def main():
+    tokens = load_csv('data.csv')  # Replace with your CSV file name
+    run_price_updates(tokens)
 
 if __name__ == "__main__":
     main()
